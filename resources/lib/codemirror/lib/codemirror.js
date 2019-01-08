@@ -7728,6 +7728,7 @@ function defineOptions(CodeMirror) {
   option("direction", "ltr", function (cm, val) { return cm.doc.setDirection(val); }, true);
   option("autocorrect", false)
   option("autocapitalize", false)
+  option("preventDefaultOnKeyPress", true)
 }
 
 function guttersChanged(cm) {
@@ -9019,6 +9020,9 @@ ContentEditableInput.prototype.setUneditable = function (node) {
 };
 
 ContentEditableInput.prototype.onKeyPress = function (e) {
+  if (!this.cm.options.preventDefaultOnKeyPress) {
+    return
+  }
   if (e.charCode == 0) { return }
   e.preventDefault();
   if (!this.cm.isReadOnly())
