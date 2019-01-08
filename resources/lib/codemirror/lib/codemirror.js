@@ -7726,6 +7726,8 @@ function defineOptions(CodeMirror) {
   option("tabindex", null, function (cm, val) { return cm.display.input.getField().tabIndex = val || ""; });
   option("autofocus", null);
   option("direction", "ltr", function (cm, val) { return cm.doc.setDirection(val); }, true);
+  option("autocorrect", false)
+  option("autocapitalize", false)
 }
 
 function guttersChanged(cm) {
@@ -8117,10 +8119,10 @@ function copyableRanges(cm) {
   return {text: text, ranges: ranges}
 }
 
-function disableBrowserMagic(field, spellcheck) {
-  field.setAttribute("autocorrect", "off");
-  field.setAttribute("autocapitalize", "off");
+function disableBrowserMagic(field, spellcheck, autocorrect, autocapitalize) {
   field.setAttribute("spellcheck", !!spellcheck);
+  field.setAttribute("autocorrect", !!autocorrect);
+  field.setAttribute("autocapitalize", !!autocapitalize);
 }
 
 function hiddenTextarea() {
@@ -8685,7 +8687,7 @@ ContentEditableInput.prototype.init = function (display) {
 
   var input = this, cm = input.cm;
   var div = input.div = display.lineDiv;
-  disableBrowserMagic(div, cm.options.spellcheck);
+  disableBrowserMagic(div, cm.options.spellcheck, cm.options.autocorrect, cm.options.autocapitalize);
 
   on(div, "paste", function (e) {
     if (signalDOMEvent(cm, e) || handlePaste(e, cm)) { return }
