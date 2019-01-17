@@ -8027,7 +8027,7 @@ function setLastCopied(newLastCopied) {
   lastCopied = newLastCopied;
 }
 
-function applyTextInput(cm, inserted, deleted, sel, origin, shouldMakeChange) {
+function applyTextInput(cm, inserted, deleted, sel, origin) {
   var doc = cm.doc;
   cm.display.shift = false;
   if (!sel) { sel = doc.sel; }
@@ -8063,9 +8063,7 @@ function applyTextInput(cm, inserted, deleted, sel, origin, shouldMakeChange) {
     updateInput = cm.curOp.updateInput;
     var changeEvent = {from: from, to: to, text: multiPaste ? multiPaste[i$1 % multiPaste.length] : textLines,
                        origin: origin || (paste ? "paste" : cm.state.cutIncoming ? "cut" : "+input")};
-    if (shouldMakeChange !== false) {
-      makeChange(cm.doc, changeEvent);
-    }
+    makeChange(cm.doc, changeEvent);
     signalLater(cm, "inputRead", cm, changeEvent);
   }
   if (inserted && !paste)
@@ -9022,13 +9020,13 @@ ContentEditableInput.prototype.setUneditable = function (node) {
 };
 
 ContentEditableInput.prototype.onKeyPress = function (e) {
-  if (e.charCode == 0) { return }
-  var shouldPreventDefault = this.cm.options.preventDefaultOnKeyPress;
-  if (shouldPreventDefault) {
-    e.preventDefault();
+  if (!this.cm.options.preventDefaultOnKeyPress) {
+    return
   }
+  if (e.charCode == 0) { return }
+  e.preventDefault();
   if (!this.cm.isReadOnly())
-    { operation(this.cm, applyTextInput)(this.cm, String.fromCharCode(e.charCode == null ? e.keyCode : e.charCode), 0, null, null, shouldPreventDefault); }
+    { operation(this.cm, applyTextInput)(this.cm, String.fromCharCode(e.charCode == null ? e.keyCode : e.charCode), 0); }
 };
 
 ContentEditableInput.prototype.readOnlyChanged = function (val) {
