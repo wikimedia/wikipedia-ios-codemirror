@@ -146,7 +146,7 @@
       window.webkit.messageHandlers.codeMirrorSearchMessage.postMessage(message);
     }
 
-    function focusOnMatchAtIndex(matches, index) {
+    function focusOnMatchAtIndex(matches, index, id) {
       const focusClassName = "cm-searching-focus";
       const match = matches[index];
       match.classList.add(focusClassName);
