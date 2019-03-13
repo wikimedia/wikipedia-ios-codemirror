@@ -9033,6 +9033,9 @@ ContentEditableInput.prototype.setUneditable = function (node) {
 };
 
 ContentEditableInput.prototype.onKeyPress = function (e) {
+  if (!this.cm.options.preventDefault) {
+    return
+  }
   if (e.charCode == 0) { return }
   e.preventDefault();
   if (!this.cm.isReadOnly())
