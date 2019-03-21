@@ -24,6 +24,7 @@
       var query = state.query;
       var loopMatchPositionIndex = 0;
       state.initialFocusedMatchIndex = -1;
+      var fromCursor = state.cursorPositionBeforeSearch
 
       if (typeof query == "string")
         query = new RegExp(query.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&"), caseInsensitive ? "gi" : "g");
@@ -37,7 +38,6 @@
           stream.pos += match[0].length || 1;
 
           if (state.initialFocusedMatchIndex == -1) {
-            var fromCursor = cm.getCursor('from')
             if (stream.lineOracle.line > fromCursor.line || (stream.lineOracle.line == fromCursor.line && stream.start >= fromCursor.ch)) {
               state.initialFocusedMatchIndex = loopMatchPositionIndex;
              }
@@ -112,10 +112,10 @@
       const query = cm.state.query;
       if (query && !state.query) cm.operation(function () {
         startSearch(cm, state, query);
-        state.posFrom = state.posTo = cm.getCursor();
+        state.posFrom = state.posTo = state.cursorPositionBeforeSearch;
         findNext(cm, rev);
       });
-      focusOnMatch(state)
+      focusOnMatch(cm, state)
     }
 
     function clearFocusedMatches(cm) {
@@ -130,7 +130,7 @@
       }
     } 
 
-    function focusOnMatch(state, focus) {
+    function focusOnMatch(cm, state, focus) {
       const matches = document.getElementsByClassName("cm-searching");
       const matchesCount = matches.length;
       
@@ -184,6 +184,10 @@
 
       window.webkit.messageHandlers.codeMirrorSearchMessage.postMessage(message);
       state.initialFocusedMatchIndex = -1;
+
+      if (cm) {
+        cm.setSelection(state.posFrom, state.posTo, { scroll: false })
+      }
     }
 
     function focusOnMatchAtIndex(matches, index, id) {
@@ -221,7 +225,7 @@
         if (!cursor.find(rev)) return;
       }
       state.posFrom = cursor.from(); state.posTo = cursor.to();
-      if (focus) focusOnMatch(state, focus)
+      if (focus) focusOnMatch(cm, state, focus)
     });}
   
     function clearSearch(cm) {cm.operation(function() {
@@ -265,7 +269,7 @@
 
       //resets count to 0/0
       let state = getSearchState(cm);
-      focusOnMatch(state);
+      focusOnMatch(cm, state);
     }
 
     function replaceSingleWithoutDialogs(cm) {
@@ -287,13 +291,13 @@
           state.focusedMatchIndex = -1;
           state.initialFocusedMatchIndex = -1;
           if (!(match = cursor.findNext()) || (start && cursor.from().line == start.line && cursor.from().ch == start.ch)) {
-            focusOnMatch(state); //resets count to 0/0
+            focusOnMatch(cm, state); //resets count to 0/0
             return;
           }
         }
 
         state.posFrom = cursor.from(); state.posTo = cursor.to();
-        focusOnMatch(state);
+        focusOnMatch(cm, state);
         if (shouldReplace) {
           cm.isReplacing = true;
           doReplace(match);
@@ -344,7 +348,14 @@
         });
       });
     }
-  
+
+    function saveCursorPositionBeforeSearch(cm) {
+      var state = getSearchState(cm);
+      var cursorPosition = cm.getCursor();
+      state.cursorPositionBeforeSearch = {line: cursorPosition.line, ch: cursorPosition.ch};
+    }
+
+    CodeMirror.commands.prepareForFindAndReplace = function(cm) {saveCursorPositionBeforeSearch(cm)}
     CodeMirror.commands.find = function(cm) {clearSearch(cm); doSearch(cm);};
     CodeMirror.commands.findNext = function(cm) {clearFocusedMatches(cm); doSearch(cm, false, {next: true});};
     CodeMirror.commands.findPrev = function(cm) {clearFocusedMatches(cm); doSearch(cm, true, {prev: true});};
