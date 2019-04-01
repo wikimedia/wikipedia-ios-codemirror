@@ -129,7 +129,17 @@
         element.classList.remove(focusClassName);
         if (element.id === focusedMatchID) element.id = "";
       }
-    } 
+    }
+
+    function clearReplaced(cm) {
+      const focusClassName = "cm-searching-replaced";
+      const focusedElements = document.getElementsByClassName(focusClassName);
+
+      while (focusedElements.length > 0) {
+        var element = focusedElements[0];
+        element.classList.remove(focusClassName);
+      }
+    }
 
     function focusOnMatch(state, focus, forceIncrement) {
       const matches = document.getElementsByClassName("cm-searching");
@@ -230,6 +240,7 @@
       state.lastQuery = state.query;
       if (!state.query) return;
       clearFocusedMatches(cm);
+      clearReplaced(cm);
       state.focusedMatchIndex = null
       state.initialFocusedMatchIndex = null;
       state.query = state.queryText = null;
