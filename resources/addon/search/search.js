@@ -131,13 +131,9 @@
       }
     }
 
-    function clearReplaced(cm) {
-      const focusClassName = "cm-searching-replaced";
-      const focusedElements = document.getElementsByClassName(focusClassName);
-
-      while (focusedElements.length > 0) {
-        var element = focusedElements[0];
-        element.classList.remove(focusClassName);
+    function clearReplaced(state) {
+      if (state.replacedMarkers) {
+        state.replacedMarkers.forEach((marker) => { marker.clear() });
       }
     }
 
@@ -240,7 +236,7 @@
       state.lastQuery = state.query;
       if (!state.query) return;
       clearFocusedMatches(cm);
-      clearReplaced(cm);
+      clearReplaced(state);
       state.focusedMatchIndex = null
       state.initialFocusedMatchIndex = null;
       state.query = state.queryText = null;
@@ -312,13 +308,18 @@
 
           cm.setCursor(state.posFrom)
 
-          doReplace(cm, match);
+          doReplace(cm, state);
           cm.isReplacing = false;
         }
       }
-      var doReplace = function(cm, match) {
+      var doReplace = function(cm, state) {
         cursor.replace(replaceText);
-        cm.markText(cursor.from(), cursor.to(), {className: 'cm-searching-replaced'})
+        const marker = cm.markText(cursor.from(), cursor.to(), {className: 'cm-searching-replaced'})
+        if (state.replacedMarkers) {
+          state.replacedMarkers.push(marker);
+        } else {
+          state.replacedMarkers = [marker];
+        }
         advance(false);
         var forceIncrement = replaceText.includes(query) || replaceText.toLowerCase() === query.toLowerCase();
         focusOnMatch(state, null, forceIncrement);
