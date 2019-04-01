@@ -264,7 +264,6 @@
           } else {
             cursor.replace(text);
           }
-          markReplacedText(cm, cursor);
           count++;
         }
       });
