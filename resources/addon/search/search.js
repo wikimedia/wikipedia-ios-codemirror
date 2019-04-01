@@ -309,7 +309,7 @@
         cursor.replace(replaceText);
         cm.markText(cursor.from(), cursor.to(), {className: 'cm-searching-replaced'})
         advance(false);
-        var forceIncrement = replaceText.includes(query) || replaceText.lowercase == query.lowercase;
+        var forceIncrement = replaceText.includes(query) || replaceText.toLowerCase() === query.toLowerCase();
         focusOnMatch(state, null, forceIncrement);
       };
       advance(true);
