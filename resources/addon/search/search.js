@@ -131,6 +131,16 @@
       }
     }
 
+    function markReplacedText(cm, cursor) {
+      const state = getSearchState(cm);
+      const marker = cm.markText(cursor.from(), cursor.to(), {className: 'cm-searching-replaced'})
+          if (state.replacedMarkers) {
+          state.replacedMarkers.push(marker);
+          } else {
+          state.replacedMarkers = [marker];
+          }
+      } 
+
     function clearReplaced(state) {
       if (state.replacedMarkers) {
         state.replacedMarkers.forEach((marker) => { marker.clear() });
@@ -254,6 +264,7 @@
           } else {
             cursor.replace(text);
           }
+          markReplacedText(cm, cursor);
           count++;
         }
       });
@@ -314,12 +325,7 @@
       }
       var doReplace = function(cm, state) {
         cursor.replace(replaceText);
-        const marker = cm.markText(cursor.from(), cursor.to(), {className: 'cm-searching-replaced'})
-        if (state.replacedMarkers) {
-          state.replacedMarkers.push(marker);
-        } else {
-          state.replacedMarkers = [marker];
-        }
+        markReplacedText(cm, cursor);
         advance(false);
         var forceIncrement = replaceText.includes(query) || replaceText.toLowerCase() === query.toLowerCase();
         focusOnMatch(state, null, forceIncrement);
