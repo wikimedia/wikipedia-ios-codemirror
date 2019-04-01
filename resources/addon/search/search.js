@@ -301,12 +301,13 @@
 
           cm.setCursor(state.posFrom)
 
-          doReplace(match);
+          doReplace(cm, match);
           cm.isReplacing = false;
         }
       }
-      var doReplace = function(match) {
+      var doReplace = function(cm, match) {
         cursor.replace(replaceText);
+        cm.markText(cursor.from(), cursor.to(), {className: 'cm-searching-replaced'})
         advance(false);
         var forceIncrement = replaceText.includes(query) || replaceText.lowercase == query.lowercase;
         focusOnMatch(state, null, forceIncrement);
